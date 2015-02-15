@@ -27,9 +27,11 @@ gulp.task('watch-templates', function() {
 gulp.task('install-deps', function() {
   gulp.src([
     './node_modules/angular-bootstrap/dist/ui-bootstrap-tpls.min.js',
-    './node_modules/angular-bootstrap/dist/assets',
     './node_modules/angular/angular.min.js',
   ]).pipe(gulp.dest('./pub/js/'));
+
+  gulp.src('./node_modules/angular-bootstrap/dist/assets/**/*')
+    .pipe(gulp.dest('./pub/js/assets'));
 
   gulp.src([
     './node_modules/angular/angular-csp.css',
