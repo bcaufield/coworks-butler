@@ -6,20 +6,37 @@ html(lang="en")
     meta( http-equiv='X-UA-Compatible', content='IE=edge' )
     meta( name='viewport', content='width=device-width, initial-scale=1.0' )
 
-    link(href="css/bootstrap.min.css", rel="stylesheet")
-    link(href="css/bootstrap-theme.min.css", rel="stylesheet")
+    link( href='css/bootstrap.min.css', rel="stylesheet")
   body
-    h1 Jade - node template engine
-    #container.col
-      if youAreUsingJade
-        p You are amazing
-      else
-        p Get on it!
-      p.
-        Jade is a terse and simple
-        templating language with a
-        strong focus on performance
-        and powerful features.
+    header.navbar.navbar-static-top(
+      style={
+        background: 'url(img/coworks_pano_2.jpg)',
+        'background-size': 'cover'
+      }
+    )
+      .navbar-inner(
+        style={
+          'border-bottom': '1px solid #ccc',
+          'border-top': '3px solid #FD8204'
+        }
+      )
+        .container(style={
+          'min-height':'100px',
+          position: 'relative'}
+        )
+          h1(style={'text-align': 'center'})
+            img(
+              src='img/coworks_logo.png'
+              alt='logo'
+              style={width: '320px'}
+            )
 
-    script( src='js/bootstrap.min.js' )
+    .container
+      .well(style={'text-align': 'center'})
+        h2 Welcome to the Syracuse CoWorks facility.
+        p Please login to use our network
+
+
+
     script( src='js/angular.min.js' )
+    script( src='js/ui-bootstrap-tpls.min.js' )
