@@ -7,7 +7,7 @@ html(lang="en")
     meta( name='viewport', content='width=device-width, initial-scale=1.0' )
 
     link( href='css/bootstrap.min.css', rel="stylesheet")
-  body
+  body( ng-app='login-form' )
     header.navbar.navbar-static-top(
       style={
         background: 'url(img/coworks_pano_2.jpg)',
@@ -36,7 +36,22 @@ html(lang="en")
         h2 Welcome to the Syracuse CoWorks facility.
         p Please login to use our network
 
-
+      .row
+        .col-sm-4.col-sm-offset-4( ng-controller='loginCtrl' )
+          form
+            .form-group
+              label(for='email') Email:
+              input#email.form-control(
+                type='input'
+                placeholder='Email'
+              )
+            .form-group
+              label(for='password') Password:
+              input#password.form-control(
+                type='password'
+                placeholder='Password'
+              )
+            button.btn.btn-default( type="submit" ) Submit
 
     script( src='js/angular.min.js' )
     script( src='js/ui-bootstrap-tpls.min.js' )
