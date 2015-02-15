@@ -28,6 +28,7 @@ gulp.task('install-deps', function() {
   gulp.src([
     './node_modules/angular-bootstrap/dist/ui-bootstrap-tpls.min.js',
     './node_modules/angular/angular.min.js',
+    './node_modules/angular/angular.min.js.map',
   ]).pipe(gulp.dest('./pub/js/'));
 
   gulp.src('./node_modules/angular-bootstrap/dist/assets/**/*')

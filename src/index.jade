@@ -7,7 +7,12 @@ html(lang="en")
     meta( name='viewport', content='width=device-width, initial-scale=1.0' )
 
     link( href='css/bootstrap.min.css', rel="stylesheet")
-  body( ng-app='login-form' )
+  body(
+    ng-app='splash-page'
+    style={
+      'padding-bottom': '10px'
+    }
+  )
     header.navbar.navbar-static-top(
       style={
         background: 'url(img/coworks_pano_2.jpg)',
@@ -37,21 +42,43 @@ html(lang="en")
         p Please login to use our network
 
       .row
-        .col-sm-4.col-sm-offset-4( ng-controller='loginCtrl' )
-          form
-            .form-group
-              label(for='email') Email:
-              input#email.form-control(
-                type='input'
-                placeholder='Email'
+        .col-sm-4.col-sm-offset-4( ng-controller='loginCtl' )
+          .row
+            .col-sm-12
+              .bg-danger(
+                ng-show="errorMsg"
+                style={
+                  padding: '15px',
+                  'text-align': 'center',
+                  'border-radius': '4px',
+                  'margin-bottom': '20px'
+                }
               )
-            .form-group
-              label(for='password') Password:
-              input#password.form-control(
-                type='password'
-                placeholder='Password'
-              )
-            button.btn.btn-default( type="submit" ) Submit
+                p {{errorMsg}}
+                p Please contact support at 1-555-555-5555
+
+          .row
+            .col-sm-12
+              form
+                .form-group
+                  label(for='email') Email:
+                  input#email.form-control(
+                    type='input'
+                    placeholder='Email'
+                    ng-model='userinfo.username'
+                  )
+                .form-group
+                  label(for='password') Password:
+                  input#password.form-control(
+                    type='password'
+                    placeholder='Password'
+                    ng-model='userinfo.password'
+                  )
+                button.btn.btn-primary(
+                  type='submit'
+                  ng-click='login()'
+                ) Submit
 
     script( src='js/angular.min.js' )
     script( src='js/ui-bootstrap-tpls.min.js' )
+    script( src='js/app.js' )
