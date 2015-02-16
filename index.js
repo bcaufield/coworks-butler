@@ -4,7 +4,9 @@ var express = require('express'),
   session = require('express-session'),
   fs = require('fs'),
   morgan = require('morgan'),
-  port = process.env.EXPRESS_PORT || 4000;
+  winston = require('winston'),
+  nexudus = require('./nexudus'),
+  config = require('./config');
 
 // Add the body parser
 app.use(body_parser.json());
@@ -17,8 +19,23 @@ app.use(session({
 }));
 
 // Configure logging
-var accessLogStream = fs.createWriteStream(__dirname + '/access.log', {flags: 'a'});
+var accessLogStream = fs.createWriteStream(config.logs.http.path, {flags: 'a'});
 app.use(morgan('combined', {stream: accessLogStream}));
+
+var logger = new (winston.Logger)({
+  transports: [
+    new (winston.transports.Console)({
+      timestamp: true,
+      prettyPrint: true
+    }),
+    new (winston.transports.File)({
+      filename: config.logs.access.path,
+      maxSize: config.logs.access.maxSize,
+      maxFiles: config.logs.access.maxFiles,
+      tailable: true
+    })
+  ]
+});
 
 // Parse get vals for redirect
 app.use(function (req, res, next) {
@@ -70,6 +87,7 @@ app.use(function (req, res, next) {
 app.use(express.static(__dirname + '/pub'));
 
 app.post('/auth', function(req, res) {
+  logger.info('Granted access to %s', req.body.username, {session: req.session})
   res.json({
     success: true,
     session: req.session,
@@ -83,9 +101,10 @@ app.get('/session', function(req, res) {
 });
 
 app.get('/splash', function(req, res) {
+  logger.info('Splashdown', {session: req.session});
   res.redirect('/');
 });
 
-app.listen(port, function() {
-  console.log("Listening on " + port);
+app.listen(config.server.port, function() {
+  logger.info("Started server. Listening on %d", config.server.port);
 });
