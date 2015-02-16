@@ -1,12 +1,13 @@
 doctype html
-html(lang="en")
+html(lang='en')
   head
-    title= pageTitle
+    title='Syracuse CoWorks'
+    base( href='/' )
     meta( charset='utf-8' )
     meta( http-equiv='X-UA-Compatible', content='IE=edge' )
     meta( name='viewport', content='width=device-width, initial-scale=1.0' )
 
-    link( href='css/bootstrap.min.css', rel="stylesheet")
+    link( href='css/bootstrap.min.css', rel='stylesheet')
   body(
     ng-app='splash-page'
     style={
@@ -37,6 +38,24 @@ html(lang="en")
             )
 
     .container
+      .ui-view
+
+      nav.navbar.navbar-default
+        .container
+          ul.nav.navbar-nav.navbar-left
+            li
+              small.navbar-text Syracuse CoWorks
+          ul.nav.navbar-nav.navbar-right( style={ 'padding-right': '45px' } )
+            li
+              small.navbar-text
+                a.navbar-link( ui-sref='admin', href ) Admin
+
+    script( src='js/angular.min.js' )
+    script( src='js/ui-bootstrap-tpls.min.js' )
+    script( src='js/angular-ui-router.min.js' )
+    script( src='js/app.js' )
+
+    script#login( type='text/ng-template')
       .well(style={'text-align': 'center'})
         h2 Welcome to the Syracuse CoWorks facility.
         p Please login to use our network
@@ -46,7 +65,7 @@ html(lang="en")
           .row
             .col-sm-12
               .bg-danger(
-                ng-show="errorMsg"
+                ng-show='errorMsg'
                 style={
                   padding: '15px',
                   'text-align': 'center',
@@ -79,6 +98,54 @@ html(lang="en")
                   ng-click='login()'
                 ) Submit
 
-    script( src='js/angular.min.js' )
-    script( src='js/ui-bootstrap-tpls.min.js' )
-    script( src='js/app.js' )
+    script#admin( type='text/ng-template')
+      .row
+        .col-sm-12
+          tabset
+            tab( heading='Config' )
+              div( ng-include="'admin-config'" )
+            tab( heading='Logs' )
+              div( ng-include="'admin-logs'" )
+
+    script#admin-config( type='text/ng-template' )
+      h2 Config
+      p No configuration yet
+
+    script#admin-logs( type='text/ng-template' )
+      h2 Logs
+
+      div( ng-controller='adminLogsCtl')
+        .row( style={ 'margin-bottom': '10px' })
+          .col-sm-12
+            form.form-inline
+              .form-group
+                input.form-control(
+                  type='input'
+                  placeholder='Search'
+                  ng-model='filterText'
+                )
+              .btn-group
+                label.btn.btn-primary( ng-model='levels.info', btn-checkbox) Info
+                label.btn.btn-primary( ng-model='levels.door', btn-checkbox) Door
+                label.btn.btn-primary( ng-model='levels.wireless', btn-checkbox) Wireless
+
+        .row
+          .col-sm-12
+            table.table.table-condensed.table-bordered.table-striped
+              thead
+                tr
+                  th Timestamp
+                  th Level
+                  th Message
+                  th Node
+                  th Client Mac
+                  th Continue Url
+              tbody
+                tr( ng-repeat='row in rows | filter:filterLevels | filter:filterText' )
+                  td.timestamp {{row.timestamp | date:'medium'}}
+                  td.level {{row.level}}
+                  td.message {{row.message}}
+                  td.node {{row.session.node_id}}
+                  td.client {{row.session.client_mac}}
+                  td.continue {{row.session.user_continue_url}}
+

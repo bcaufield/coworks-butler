@@ -2,11 +2,13 @@ var express = require('express'),
   app = express(),
   body_parser = require('body-parser'),
   session = require('express-session'),
+  basicAuth = require('basic-auth'),
   fs = require('fs'),
   morgan = require('morgan'),
   winston = require('winston'),
   nexudus = require('./nexudus'),
-  config = require('./config');
+  config = require('./config'),
+  apiSlug = '/api';
 
 // Add the body parser
 app.use(body_parser.json());
@@ -17,6 +19,28 @@ app.use(session({
   resave: false,
   saveUninitialized: true
 }));
+
+// Configure authentication for admin pages
+var auth = function (req, res, next) {
+  function unauthorized(res) {
+    res.set('WWW-Authenticate', 'Basic realm=Authorization Required');
+    return res.sendStatus(401);
+  };
+
+  var user = basicAuth(req);
+
+  if (!user || !user.name || !user.pass) {
+    return unauthorized(res);
+  };
+
+  if (user.name === config.server.admin.user
+      && user.pass === config.server.admin.pass
+  ) {
+    return next();
+  } else {
+    return unauthorized(res);
+  };
+};
 
 // Configure logging
 var accessLogStream = fs.createWriteStream(config.logs.http.path, {flags: 'a'});
@@ -34,7 +58,12 @@ var logger = new (winston.Logger)({
       maxFiles: config.logs.access.maxFiles,
       tailable: true
     })
-  ]
+  ],
+  levels: {
+    info: 0,
+    door: 1,
+    wireless: 2
+  }
 });
 
 // Parse get vals for redirect
@@ -84,25 +113,53 @@ app.use(function (req, res, next) {
   next();
 });
 
+// Static assets
 app.use(express.static(__dirname + '/pub'));
 
-app.post('/auth', function(req, res) {
-  logger.info('Granted access to %s', req.body.username, {session: req.session})
+// Splash page
+app.get('/splash', function(req, res) {
+  logger.wireless('Splashdown', {session: req.session});
+  res.redirect('/');
+});
+
+/**
+ * API endpoints
+ */
+app.post(apiSlug + '/auth', function(req, res) {
+  logger.wireless('Granted access to %s', req.body.username, {session: req.session})
   res.json({
     success: true,
-    session: req.session,
     redirect: req.session.base_grant_url + '?continue_url=' + req.session.user_continue_url
   });
   req.session.destroy();
+  res.end();
 });
 
-app.get('/session', function(req, res) {
-  res.json(req.session);
+app.get(apiSlug + '/admin/check', auth, function(req, res) {
+  res.json({
+    success: true
+  }).end();
 });
 
-app.get('/splash', function(req, res) {
-  logger.info('Splashdown', {session: req.session});
-  res.redirect('/');
+app.get(apiSlug + '/admin/logs', auth, function(req, res) {
+  logger.query({
+    order: 'desc',
+    limit: 1000
+  }, function(err, results) {
+    var retVal = [];
+    if (!err && results && results.file) {
+      retVal = results.file;
+    }
+
+    res.json({
+      rows: retVal
+    }).end();
+  });
+});
+
+app.all('/*', function(req, res, next) {
+    // Just send the index.html for other files to support HTML5Mode
+    res.sendFile('pub/index.html', { root: __dirname });
 });
 
 app.listen(config.server.port, function() {

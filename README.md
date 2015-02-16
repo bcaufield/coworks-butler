@@ -16,7 +16,7 @@ npm install --global gulp
 1. Clone this repo into a directory, and move into it
 2. Install *npm* requirements: `npm install`
 3. Build and compile application: `gulp build`
-4. (Optional) Set port to listen on: `set EXPRESS_PORT=80`
+4. Copy *config.js-example* to *config.js*, and fill it out
 5. Run node app: `node .`  or `node index.js`
 
 You can then point your Meraki Custom Splash URL to http://your.host:port/splash

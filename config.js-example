@@ -4,14 +4,18 @@ module.exports = {
     auth: 'user:pass' // user:pass format
   },
   server: {
-    port: 4000
+    port: 4000, // The port you want the server to listen on
+    admin: {
+      user: 'admin',
+      pass: '', // You MUST specify a password, it will decline blank passwords
+    }
   },
   logs: {
     http: {
-      path: __dirname + '/logs/http.log'
+      path: __dirname + '/logs/http.log' // Basic apache like logs
     },
     access: {
-      path: __dirname + '/logs/access.log',
+      path: __dirname + '/logs/access.log', // JSON access log
       maxSize: 52428800, // 50MB
       maxFiles: 5
     }

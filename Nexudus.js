@@ -14,6 +14,8 @@ function Nexudus(host, auth) {
   this.auth = auth;
 };
 
+util.inherits(Nexudus, EventEmitter);
+
 /**
  * Search of user(s) in the api.
  * If you need more than 1000, you're not really searching ;-)
@@ -75,7 +77,5 @@ Nexudus.prototype.findUser = function(user, field, callback) {
 Nexudus.prototype.authUser = function(user, pass, callback) {
 
 };
-
-util.inherits(Nexudus, EventEmitter);
 
 module.exports = Nexudus;
