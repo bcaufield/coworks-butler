@@ -6,7 +6,7 @@ var express = require('express'),
   fs = require('fs'),
   morgan = require('morgan'),
   winston = require('winston'),
-  nexudus = require('./nexudus'),
+  Nexudus = require('./nexudus'),
   config = require('./config'),
   apiSlug = '/api';
 
@@ -126,13 +126,36 @@ app.get('/splash', function(req, res) {
  * API endpoints
  */
 app.post(apiSlug + '/auth', function(req, res) {
-  logger.wireless('Granted access to %s', req.body.username, {session: req.session})
-  res.json({
-    success: true,
-    redirect: req.session.base_grant_url + '?continue_url=' + req.session.user_continue_url
-  });
-  req.session.destroy();
-  res.end();
+  var user = req.body.username,
+    pass = req.body.password;
+
+  if (user && pass) {
+    var nex = new Nexudus(config.nexudus.loginBase, config.nexudus.auth);
+
+    nex.authUser(user, pass, function(result, message) {
+      if (result) {
+        logger.wireless('Granted access to %s', req.body.username, {session: req.session})
+        res.json({
+          success: true,
+          redirect: req.session.base_grant_url + '?continue_url=' + req.session.user_continue_url
+        });
+        // req.session.destroy();
+        res.end();
+      } else {
+        logger.wireless('Denied access to %s, Nexudus Rejection: %s', req.body.username, message, {session: req.session})
+        res.json({
+          success: false,
+          message: message || 'Unknown Error'
+        }).end();
+      }
+    });
+  } else {
+    logger.wireless('Denied access to %s, Empty Form', req.body.username, {session: req.session})
+    res.json({
+      success: false,
+      message: 'Username/Password missing'
+    }).end();
+  }
 });
 
 app.get(apiSlug + '/admin/check', auth, function(req, res) {

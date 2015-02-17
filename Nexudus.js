@@ -1,6 +1,7 @@
 var EventEmitter = require('events').EventEmitter,
   util = require('util'),
-  https = require('https');
+  https = require('https'),
+  querystring = require('querystring');
 
 /**
  * An object to interact with Nexudus.
@@ -75,7 +76,92 @@ Nexudus.prototype.findUser = function(user, field, callback) {
  *                        message: string, a message for the user (typically an error)
  */
 Nexudus.prototype.authUser = function(user, pass, callback) {
+  var host = this.host;
+  https.get({
+    host: host,
+    path: '/Login'
+  }, function(res) {
+    if (res.headers['set-cookie']) {
+      var requestToken = null,
+        cookieJar = [];
 
+      for (var x in res.headers['set-cookie']) {
+        var matches = res.headers['set-cookie'][x].match(/^(.+?)=(.+?);/);
+        if (matches) {
+          cookieJar.push(matches[1] + '=' + matches[2]);
+        }
+      }
+
+      res.on('data', function(html) {
+        var htmlMatches = html.toString().match(/name="__RequestVerificationToken" .+? value="(.+?)"/);
+        if (htmlMatches) {
+          requestToken = htmlMatches[1];
+        }
+
+        if (requestToken) {
+          var postData = querystring.stringify({
+            login: user,
+            pass: pass,
+            returnUrl: '/en/profile',
+            '__RequestVerificationToken': requestToken,
+            remember: false
+          });
+          var opts = {
+            host: host,
+            path: '/Login/Json',
+            method: 'POST',
+            headers: {
+              Host: host,
+              Origin: 'https://' + host,
+              'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+              'Content-Length': postData.length,
+              'Cookie': cookieJar.join('; ')
+            }
+          };
+
+          var loginReq = https.request(opts, function(loginRes) {
+            loginRes.on('data', function(data) {
+              if (data && data.length) {
+                try {
+                  var dataObj = JSON.parse(data.toString());
+                  if (dataObj.valid) {
+                    if (callback) {
+                      callback(true);
+                    }
+                  } else if(callback) {
+                      callback(false, 'Invalid Username/Password');
+                  }
+                } catch (e) {
+                  if (callback) {
+                    callback(false, e.message);
+                  }
+                }
+              } else if (callback) {
+                callback(false, 'Invalid data returned');
+              }
+            });
+          });
+
+          loginReq.on('error', function(e) {
+            if (callback) {
+              callback(false, e.message);
+            }
+          });
+
+          loginReq.write(postData);
+          loginReq.end();
+        } else if (callback) {
+          callback(false, 'Missing API Token');
+        }
+      });
+    } else if (callback) {
+      callback(false, 'Missing API Cookie Header');
+    }
+  }).on('error', function(e) {
+    if (callback) {
+      callback(false, e.message);
+    }
+  });
 };
 
 module.exports = Nexudus;
