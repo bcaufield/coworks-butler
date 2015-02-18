@@ -1,5 +1,5 @@
-Meraki Splash Page
-==================
+Syracuse CoWorks Butler
+=======================
 
 An angularjs based, node served splash page verification system for Meraki access points.
 

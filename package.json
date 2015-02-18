@@ -1,26 +1,23 @@
 {
-  "name": "meraki-splash",
+  "name": "coworks-butler",
   "version": "0.0.1",
-  "description": "A splash page system for Meraki access points",
+  "description": "An automated butler for Syracuse CoWorks",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/shaunburdick/meraki-splash"
+    "url": "https://github.com/shaunburdick/coworks-butler"
   },
   "private": true,
   "keywords": [
     "node",
-    "meraki"
+    "butler"
   ],
   "author": "Shaun Burdick <github@shaunburdick.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/shaunburdick/meraki-splash/issues"
+    "url": "https://github.com/shaunburdick/coworks-butler/issues"
   },
-  "homepage": "https://github.com/shaunburdick/meraki-splash",
+  "homepage": "https://github.com/shaunburdick/coworks-butler",
   "dependencies": {
     "angular": "^1.3.13",
     "angular-bootstrap": "^0.12.0",
