@@ -39,4 +39,7 @@ gulp.task('install-deps', function() {
     './node_modules/angular/angular-csp.css',
     './node_modules/bootstrap/dist/css/bootstrap.min.css',
   ]).pipe(gulp.dest('./pub/css/'));
+
+  gulp.src('./node_modules/bootstrap/dist/fonts/*')
+    .pipe(gulp.dest('./pub/fonts/'));
 });

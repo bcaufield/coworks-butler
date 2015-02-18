@@ -6,18 +6,21 @@ var express = require('express'),
   fs = require('fs'),
   morgan = require('morgan'),
   winston = require('winston'),
-  Nexudus = require('./nexudus'),
+  Nexudus = require('./lib/Nexudus'),
   config = require('./config'),
-  apiSlug = '/api';
+  apiSlug = '/api',
+  serverConfig = {
+    authType: 'nexudus'
+  };
 
 // Add the body parser
 app.use(body_parser.json());
 
 // Start the session
 app.use(session({
-  secret: 'lkjahsdfaklshfaskdjfhasdfkjhl',
+  secret: config.server.session.secret,
   resave: false,
-  saveUninitialized: true
+  saveUninitialized: false
 }));
 
 // Configure authentication for admin pages
@@ -26,6 +29,10 @@ var auth = function (req, res, next) {
     res.set('WWW-Authenticate', 'Basic realm=Authorization Required');
     return res.sendStatus(401);
   };
+
+  // if (req.session && req.session.admin) {
+  //   next();
+  // }
 
   var user = basicAuth(req);
 
@@ -36,6 +43,9 @@ var auth = function (req, res, next) {
   if (user.name === config.server.admin.user
       && user.pass === config.server.admin.pass
   ) {
+    // if (req.session) {
+    //   req.session.admin = true;
+    // }
     return next();
   } else {
     return unauthorized(res);
@@ -68,46 +78,48 @@ var logger = new (winston.Logger)({
 
 // Parse get vals for redirect
 app.use(function (req, res, next) {
-  if (!req.session.hasOwnProperty('base_grant_url')
-      || !req.session.base_grant_url
-  ) {
-    req.session.base_grant_url = req.query.base_grant_url;
-  }
+  if (req.hasOwnProperty('session')) {
+    if (!req.session.hasOwnProperty('base_grant_url')
+        || !req.session.base_grant_url
+    ) {
+      req.session.base_grant_url = req.query.base_grant_url;
+    }
 
-  if (!req.session.hasOwnProperty('user_continue_url')
-      || !req.session.user_continue_url
-  ) {
-    req.session.user_continue_url = req.query.user_continue_url;
-  }
+    if (!req.session.hasOwnProperty('user_continue_url')
+        || !req.session.user_continue_url
+    ) {
+      req.session.user_continue_url = req.query.user_continue_url;
+    }
 
-  if (!req.session.hasOwnProperty('node_id')
-      || !req.session.node_id
-  ) {
-    req.session.node_id = req.query.node_id;
-  }
+    if (!req.session.hasOwnProperty('node_id')
+        || !req.session.node_id
+    ) {
+      req.session.node_id = req.query.node_id;
+    }
 
-  if (!req.session.hasOwnProperty('node_mac')
-      || !req.session.node_mac
-  ) {
-    req.session.node_mac = req.query.node_mac;
-  }
+    if (!req.session.hasOwnProperty('node_mac')
+        || !req.session.node_mac
+    ) {
+      req.session.node_mac = req.query.node_mac;
+    }
 
-  if (!req.session.hasOwnProperty('gateway_id')
-      || !req.session.gateway_id
-  ) {
-    req.session.gateway_id = req.query.gateway_id;
-  }
+    if (!req.session.hasOwnProperty('gateway_id')
+        || !req.session.gateway_id
+    ) {
+      req.session.gateway_id = req.query.gateway_id;
+    }
 
-  if (!req.session.hasOwnProperty('client_ip')
-      || !req.session.client_ip
-  ) {
-    req.session.client_ip = req.query.client_ip;
-  }
+    if (!req.session.hasOwnProperty('client_ip')
+        || !req.session.client_ip
+    ) {
+      req.session.client_ip = req.query.client_ip;
+    }
 
-  if (!req.session.hasOwnProperty('client_mac')
-      || !req.session.client_mac
-  ) {
-    req.session.client_mac = req.query.client_mac;
+    if (!req.session.hasOwnProperty('client_mac')
+        || !req.session.client_mac
+    ) {
+      req.session.client_mac = req.query.client_mac;
+    }
   }
 
   next();
@@ -119,7 +131,11 @@ app.use(express.static(__dirname + '/pub'));
 // Splash page
 app.get('/splash', function(req, res) {
   logger.wireless('Splashdown', {session: req.session});
-  res.redirect('/');
+  if (serverConfig.authType == 'allow-all') {
+    res.redirect(req.session.base_grant_url + '?continue_url=' + req.session.user_continue_url);
+  } else {
+    res.redirect('/login');
+  }
 });
 
 /**
@@ -140,13 +156,13 @@ app.post(apiSlug + '/auth', function(req, res) {
           redirect: req.session.base_grant_url + '?continue_url=' + req.session.user_continue_url
         });
         // req.session.destroy();
-        res.end();
+        res;
       } else {
         logger.wireless('Denied access to %s, Nexudus Rejection: %s', req.body.username, message, {session: req.session})
         res.json({
           success: false,
           message: message || 'Unknown Error'
-        }).end();
+        });
       }
     });
   } else {
@@ -154,14 +170,14 @@ app.post(apiSlug + '/auth', function(req, res) {
     res.json({
       success: false,
       message: 'Username/Password missing'
-    }).end();
+    });
   }
 });
 
 app.get(apiSlug + '/admin/check', auth, function(req, res) {
   res.json({
     success: true
-  }).end();
+  });
 });
 
 app.get(apiSlug + '/admin/logs', auth, function(req, res) {
@@ -176,11 +192,25 @@ app.get(apiSlug + '/admin/logs', auth, function(req, res) {
 
     res.json({
       rows: retVal
-    }).end();
+    });
   });
 });
 
-app.all('/*', function(req, res, next) {
+app.get(apiSlug + '/admin/config', function(req, res) {
+  res.json(serverConfig);
+});
+
+app.post(apiSlug + '/admin/config', auth, function(req, res) {
+  if (req.body && req.body.config) {
+    var oldConfig = serverConfig;
+    serverConfig = req.body.config;
+    logger.info('Server Config updated.', { oldVal: oldConfig, newVal: serverConfig});
+  }
+
+  res.json(serverConfig);
+});
+
+app.all('*', function(req, res, next) {
     // Just send the index.html for other files to support HTML5Mode
     res.sendFile('pub/index.html', { root: __dirname });
 });

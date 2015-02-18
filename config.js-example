@@ -5,6 +5,9 @@ module.exports = {
   },
   server: {
     port: 4000, // The port you want the server to listen on
+    session: {
+      secret: 'alkfalksdjflajsdlkjads' // Secret used to store session
+    },
     admin: {
       user: 'admin',
       pass: '', // You MUST specify a password, it will decline blank passwords

@@ -56,47 +56,60 @@ html(lang='en')
     script( src='js/app.js' )
 
     script#login( type='text/ng-template')
-      .well(style={'text-align': 'center'})
-        h2 Welcome to the Syracuse CoWorks facility.
-        p Please login to use our network
+      div( ng-controller='loginCtl' )
+        .well(style={'text-align': 'center'})
+          h2 Welcome to the Syracuse CoWorks facility.
+          p Please login to use our network
 
-      .row
-        .col-sm-4.col-sm-offset-4( ng-controller='loginCtl' )
-          .row
-            .col-sm-12
-              .bg-danger(
-                ng-show='errorMsg'
-                style={
-                  padding: '15px',
-                  'text-align': 'center',
-                  'border-radius': '4px',
-                  'margin-bottom': '20px'
-                }
-              )
-                p {{errorMsg}}
-                p Please contact support at 1-555-555-5555
+        .row( ng-show='loading' )
+          .col-sm-4.col-sm-offset-4
+            .bg-info( style={ padding: '20px' } )
+              h2.text-primary Loading...
 
-          .row
-            .col-sm-12
-              form
-                .form-group
-                  label(for='email') Email:
-                  input#email.form-control(
-                    type='input'
-                    placeholder='Email'
-                    ng-model='userinfo.username'
-                  )
-                .form-group
-                  label(for='password') Password:
-                  input#password.form-control(
-                    type='password'
-                    placeholder='Password'
-                    ng-model='userinfo.password'
-                  )
-                button.btn.btn-primary(
-                  type='submit'
-                  ng-click='login()'
-                ) Submit
+        .row( ng-show='!loading && config.authType == "deny-all"' )
+          .col-sm-4.col-sm-offset-4
+            h2 Wireless Login Disabled
+
+            .bg-warning( style={ padding: '20px' } )
+              Wireless Login has been disabled.
+
+        .row( ng-show='!loading && config.authType != "deny-all"' )
+          .col-sm-4.col-sm-offset-4
+            .row
+              .col-sm-12
+                .bg-danger(
+                  ng-show='errorMsg'
+                  style={
+                    padding: '15px',
+                    'text-align': 'center',
+                    'border-radius': '4px',
+                    'margin-bottom': '20px'
+                  }
+                )
+                  p {{errorMsg}}
+                  p Please contact support at 1-555-555-5555
+
+            .row
+              .col-sm-12
+                form
+                  .form-group
+                    label(for='email') Email:
+                    input#email.form-control(
+                      type='email'
+                      placeholder='Email'
+                      ng-model='userinfo.username'
+                    )
+                  .form-group
+                    label(for='password') Password:
+                    input#password.form-control(
+                      type='password'
+                      placeholder='Password'
+                      ng-model='userinfo.password'
+                    )
+                  button.btn.btn-primary(
+                    type='submit'
+                    ng-click='login()'
+                  ) Submit
 
     script#admin( type='text/ng-template')
       .row
@@ -109,12 +122,23 @@ html(lang='en')
 
     script#admin-config( type='text/ng-template' )
       h2 Config
-      p No configuration yet
+
+      div( ng-controller='adminConfigCtl' )
+        .row
+          .col-sm-12
+            form
+              .form-group
+                h4 Authentication Override:
+                .btn-group
+                  label.btn.btn-primary( ng-model='config.authType', btn-radio="'nexudus'" ) Nexudus
+                  label.btn.btn-primary( ng-model='config.authType', btn-radio="'deny-all'" ) Deny All
+                  label.btn.btn-primary( ng-model='config.authType', btn-radio="'allow-all'" ) Allow All
+
 
     script#admin-logs( type='text/ng-template' )
       h2 Logs
 
-      div( ng-controller='adminLogsCtl')
+      div( ng-controller='adminLogsCtl' )
         .row( style={ 'margin-bottom': '10px' })
           .col-sm-12
             form.form-inline
@@ -128,6 +152,8 @@ html(lang='en')
                 label.btn.btn-primary( ng-model='levels.info', btn-checkbox) Info
                 label.btn.btn-primary( ng-model='levels.door', btn-checkbox) Door
                 label.btn.btn-primary( ng-model='levels.wireless', btn-checkbox) Wireless
+              button.btn.btn-default.pull-right( ng-click='getLogs()' )
+                span.glyphicon.glyphicon-refresh( title="Refresh" )
 
         .row
           .col-sm-12
@@ -148,4 +174,10 @@ html(lang='en')
                   td.node {{row.session.node_id}}
                   td.client {{row.session.client_mac}}
                   td.continue {{row.session.user_continue_url}}
+
+    script#error-403( type='text/ng-template' )
+      h2.text-danger Error
+
+      .bg-danger( style={ padding: '20px' } )
+        You are not authorized to access
 
