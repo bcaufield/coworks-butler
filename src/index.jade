@@ -109,7 +109,18 @@ html(lang='en')
                   button.btn.btn-primary(
                     type='submit'
                     ng-click='login()'
+                    ng-show="!loggingIn"
                   ) Submit
+                  .bg-info(
+                    ng-show='loggingIn'
+                    style={
+                      padding: '15px',
+                      'text-align': 'center',
+                      'border-radius': '4px',
+                      'margin-bottom': '20px'
+                    }
+                  )
+                    p Logging In...
 
     script#admin( type='text/ng-template')
       .row

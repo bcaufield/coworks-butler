@@ -7,6 +7,7 @@ var express = require('express'),
   morgan = require('morgan'),
   winston = require('winston'),
   Nexudus = require('./lib/Nexudus'),
+  NexudusUser = require('./lib/NexudusUser'),
   config = require('./config'),
   apiSlug = '/api',
   serverConfig = {
@@ -146,27 +147,56 @@ app.post(apiSlug + '/auth', function(req, res) {
     pass = req.body.password;
 
   if (user && pass) {
+    var deny = function(message) {
+      logger.wireless('Denied access to %s, Nexudus Rejection: %s', user, message, {session: req.session})
+      res.json({
+        success: false,
+        message: message || 'Unknown Error'
+      });
+    };
+
+    var allow = function(message, redirect) {
+      logger.wireless('Allowed access to %s', user, {session: req.session})
+      res.json({
+        success: true,
+        message: message || 'User is Valid',
+        redirect: req.session.base_grant_url + '?continue_url=' + req.session.user_continue_url
+      });
+    };
+
     var nex = new Nexudus(config.nexudus.loginBase, config.nexudus.auth);
 
     nex.authUser(user, pass, function(result, message) {
       if (result) {
-        logger.wireless('Granted access to %s', req.body.username, {session: req.session})
-        res.json({
-          success: true,
-          redirect: req.session.base_grant_url + '?continue_url=' + req.session.user_continue_url
+        // User is who they say they are, look them up
+        nex.findUser(user, function(data, err) {
+          if (!err && data && data.length === 1) {
+            var userInfo = data.pop();
+            if (userInfo.Id) {
+              var nexUser = new NexudusUser(nex, userInfo.Id);
+              nexUser.isValid(function(data, err) {
+                if (!err && data) {
+                  allow('Welcome ' + user);
+                } else {
+                  deny(err.message);
+                }
+              });
+            } else {
+              deny('Unable to find UserId');
+            }
+          } else {
+            if (err) {
+              deny(err.message);
+            } else {
+              deny('Multiple matches for ' + user);
+            }
+          }
         });
-        // req.session.destroy();
-        res;
       } else {
-        logger.wireless('Denied access to %s, Nexudus Rejection: %s', req.body.username, message, {session: req.session})
-        res.json({
-          success: false,
-          message: message || 'Unknown Error'
-        });
+        deny(message);
       }
     });
   } else {
-    logger.wireless('Denied access to %s, Empty Form', req.body.username, {session: req.session})
     res.json({
       success: false,
       message: 'Username/Password missing'
