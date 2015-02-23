@@ -156,7 +156,7 @@ app.post(apiSlug + '/auth', function(req, res) {
     };
 
     var allow = function(message, redirect) {
-      logger.wireless('Allowed access to %s', user, {session: req.session})
+      logger.wireless('Allowed access to %s on %s', user, req.session.client_mac, {session: req.session})
       res.json({
         success: true,
         message: message || 'User is Valid',
@@ -174,7 +174,7 @@ app.post(apiSlug + '/auth', function(req, res) {
             var userInfo = data.pop();
             if (userInfo.Id) {
               var nexUser = new NexudusUser(nex, userInfo.Id);
-              nexUser.isValid(function(data, err) {
+              nexUser.isValid(req.session.client_mac, function(data, err) {
                 if (!err && data) {
                   allow('Welcome ' + user);
                 } else {
@@ -241,8 +241,8 @@ app.post(apiSlug + '/admin/config', auth, function(req, res) {
 });
 
 app.all('*', function(req, res, next) {
-    // Just send the index.html for other files to support HTML5Mode
-    res.sendFile('pub/index.html', { root: __dirname });
+  // Just send the index.html for other files to support HTML5Mode
+  res.sendFile('pub/index.html', { root: __dirname });
 });
 
 app.listen(config.server.port, function() {
