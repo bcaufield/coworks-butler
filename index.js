@@ -164,11 +164,22 @@ app.post('/meraki', function(req, res) {
   if (req.body && req.body.secret && req.body.data && req.body.data.observations) {
     if (req.body.secret === config.meraki.secret) {
       if (req.body.data.observations.length) {
-        logger.meraki('Recieved %d observations from %s',
+        var connectedMacs = [];
+        for (var x in req.body.data.observations) {
+          if (req.body.data.observations[x].ssid
+              && req.body.data.observations[x].clientMac
+          ) {
+            connectedMacs.push[req.body.data.observations[x].clientMac];
+          }
+        }
+
+        activeClients.update(connectedMacs);
+
+        logger.meraki('Received %d(%d connected) observations from %s',
           req.body.data.observations.length,
+          connectedMacs.length,
           req.connection.remoteAddress
         );
-
       } else {
         logger.meraki('Empty CMX Observations from %s', req.connection.remoteAddress);
       }
