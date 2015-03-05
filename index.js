@@ -169,7 +169,7 @@ app.post('/meraki', function(req, res) {
           if (req.body.data.observations[x].ssid
               && req.body.data.observations[x].clientMac
           ) {
-            connectedMacs.push[req.body.data.observations[x].clientMac];
+            connectedMacs.push(req.body.data.observations[x].clientMac);
           }
         }
 
