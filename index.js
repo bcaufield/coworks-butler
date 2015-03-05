@@ -8,6 +8,7 @@ var express = require('express'),
   winston = require('winston'),
   Nexudus = require('./lib/Nexudus'),
   NexudusUser = require('./lib/NexudusUser'),
+  ActiveClients = require('./lib/ActiveClients'),
   config = require('./config'),
   apiSlug = '/api',
   serverConfig = {
@@ -73,8 +74,19 @@ var logger = new (winston.Logger)({
   levels: {
     info: 0,
     door: 1,
-    wireless: 2
+    wireless: 2,
+    meraki: 3
   }
+});
+
+//Setup new Active Clients Store
+var activeClients = new ActiveClients();
+activeClients.on('ActiveClient-Add', function(clientId) {
+  logger.info('New user became active: %d', clientId);
+});
+
+activeClients.on('ActiveClient-Remove', function(clientId) {
+  logger.info('New user became inactive: %d', clientId);
 });
 
 // Parse get vals for redirect
@@ -142,24 +154,30 @@ app.get('/splash', function(req, res) {
 // Meraki Push Endpoints
 app.get('/meraki', function(req, res) {
   res.send(config.meraki.validator);
-  logger.info('Responded to Meraki validation with %s', config.meraki.validator);
+  logger.meraki('Responded to Meraki validation from %s with %s',
+    req.connection.remoteAddress,
+    config.meraki.validator
+  );
 });
 
 app.post('/meraki', function(req, res) {
   if (req.body && req.body.secret && req.body.data && req.body.data.observations) {
     if (req.body.secret === config.meraki.secret) {
       if (req.body.data.observations.length) {
-        logger.info('Recieved %d observations from %s', req.body.data.observations.length, req.connection.remoteAddress);
+        logger.meraki('Recieved %d observations from %s',
+          req.body.data.observations.length,
+          req.connection.remoteAddress
+        );
 
       } else {
-        logger.info('Empty CMX Observations from %s', req.connection.remoteAddress);
+        logger.meraki('Empty CMX Observations from %s', req.connection.remoteAddress);
       }
     } else {
-      logger.info('Invalid secret from %s: %s', req.connection.remoteAddress, req.body.secret);
+      logger.meraki('Invalid secret from %s: %s', req.connection.remoteAddress, req.body.secret);
       res.end();
     }
   } else {
-    logger.info('Invalid CMX post from %s', req.connection.remoteAddress, { body: req.body });
+    logger.meraki('Invalid CMX post from %s', req.connection.remoteAddress, { body: req.body });
   }
 });
 
@@ -201,6 +219,13 @@ app.post(apiSlug + '/auth', function(req, res) {
               nexUser.isValid(req.session.client_mac, function(data, err) {
                 if (!err && data) {
                   allow('Welcome ' + user);
+                  nexUser.getMacs(function(data, err) {
+                    if (!err && data) {
+                      activeClients.newClient(nexUser.id, data);
+                    } else {
+                      logger.wireless('Checkin: Could not get macs for user', { error: err });
+                    }
+                  });
                 } else {
                   deny(err.message);
                 }

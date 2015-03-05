@@ -8,7 +8,7 @@
     "url": "https://github.com/shaunburdick/coworks-butler"
   },
   "scripts": {
-    "start": "node index.js"
+    "start": "gulp build && node index.js"
   },
   "private": true,
   "keywords": [
