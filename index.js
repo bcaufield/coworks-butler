@@ -146,19 +146,20 @@ app.get('/meraki', function(req, res) {
 });
 
 app.post('/meraki', function(req, res) {
-  try {
-    var parsed = JSON.parse(req.body.data);
-    if (parsed.secret === config.meraki.secret) {
-      if (parsed.probing.length) {
+  if (req.body && req.body.secret && req.body.data && req.body.data.observations) {
+    if (req.body.secret === config.meraki.secret) {
+      if (req.body.data.observations.length) {
+        logger.info('Recieved %d observations from %s', req.body.data.observations.length, req.connection.remoteAddress);
 
+      } else {
+        logger.info('Empty CMX Observations from %s', req.connection.remoteAddress);
       }
     } else {
-      logger.info('Invalid secret: %s', parsed.secret);
+      logger.info('Invalid secret from %s: %s', req.connection.remoteAddress, req.body.secret);
       res.end();
     }
-  } catch (e) {
-    logger.info('Invalid post from %s', req.connection.remoteAddress, { error: e });
-    res.end();
+  } else {
+    logger.info('Invalid CMX post from %s', req.connection.remoteAddress, { body: req.body });
   }
 });
 
