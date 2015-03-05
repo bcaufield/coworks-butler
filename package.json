@@ -7,6 +7,9 @@
     "type": "git",
     "url": "https://github.com/shaunburdick/coworks-butler"
   },
+  "scripts": {
+    "start": "node index.js"
+  },
   "private": true,
   "keywords": [
     "node",

@@ -37,3 +37,14 @@ From https://kb.meraki.com/knowledge_base/configuring-a-custom-hosted-splash-pag
 3. Under Custom splash URL select the radio button Or provide a URL where users will be redirected:
 4. Type the URL of your custom splash page (ie. http://yourwebsite.com/yourphpscript.php).
 5. Click "Save Changes"
+
+###Location API
+
+This tool also supports checking in via the Meraki Location API.
+
+From: https://docs.meraki.com/display/MR/Location+API
+
+The Meraki AP is configured in the Meraki dashboard on the *Configure > Network-wide settings* page in a few simple steps:
+1. Specify secret and post URL: http://your.host:port/meraki
+2. Configure and host your HTTP server to receive JSON post files
+3. Upon the first connection, the Meraki cloud will perform a single HTTP GET; the server must return the organization-specific validator string as a response, which will verify the organization’s identity as the Meraki customer. The Meraki cloud will then begin performing JSON posts.

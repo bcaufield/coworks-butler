@@ -139,6 +139,29 @@ app.get('/splash', function(req, res) {
   }
 });
 
+// Meraki Push Endpoints
+app.get('/meraki', function(req, res) {
+  res.send(config.meraki.validator);
+  logger.info('Responded to Meraki validation with %s', config.meraki.validator);
+});
+
+app.post('/meraki', function(req, res) {
+  try {
+    var parsed = JSON.parse(req.body.data);
+    if (parsed.secret === config.meraki.secret) {
+      if (parsed.probing.length) {
+
+      }
+    } else {
+      logger.info('Invalid secret: %s', parsed.secret);
+      res.end();
+    }
+  } catch (e) {
+    logger.info('Invalid post from %s', req.connection.remoteAddress, { error: e });
+    res.end();
+  }
+});
+
 /**
  * API endpoints
  */

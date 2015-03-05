@@ -1,7 +1,12 @@
 module.exports = {
   nexudus: {
     base: 'spaces.nexudus.com', // base nexudus url
+    loginBase: 'yoursite.spaces.nexudus.com',
     auth: 'user:pass' // user:pass format
+  },
+  meraki: {
+    secret: '', // Secret that you choose in the Meraki Dashboard
+    validator: '' // Validator string that is shown in the Meraki dashboard
   },
   server: {
     port: 4000, // The port you want the server to listen on
