@@ -87,6 +87,8 @@ activeClients.on('ActiveClient-Add', function(clientId) {
 
 activeClients.on('ActiveClient-Remove', function(clientId) {
   logger.info('New user became inactive: %d', clientId);
+  var nexUser = new NexudusUser(clientId);
+  nexUser.checkout();
 });
 
 // Parse get vals for redirect
@@ -201,7 +203,7 @@ app.post(apiSlug + '/auth', function(req, res) {
 
   if (user && pass) {
     var deny = function(message) {
-      logger.wireless('Denied access to %s, Nexudus Rejection: %s', user, message, {session: req.session})
+      logger.wireless('Denied access to %s, Rejection: %s', user, message, {session: req.session})
       res.json({
         success: false,
         message: message || 'Unknown Error'
@@ -229,15 +231,23 @@ app.post(apiSlug + '/auth', function(req, res) {
               var nexUser = new NexudusUser(nex, userInfo.Id);
               nexUser.isValid(req.session.client_mac, function(data, err) {
                 if (!err && data) {
-                  allow('Welcome ' + user);
-                  nexUser.getMacs(function(data, err) {
+                  nexUser.addMac(req.session.client_mac, function(data, err) {
                     if (!err && data) {
-                      activeClients.newClient(nexUser.id, data);
+                      nexUser.checkin(function(res, err) {
+                        if (!err && res) {
+                          activeClients.newClient(nexUser.id, data);
+                          allow('Welcome' + user);
+                        } else {
+                          deny(err.message || 'Could not create checkin');
+                        }
+                      });
                     } else {
                       logger.wireless('Checkin: Could not get macs for user', { error: err });
+                      deny(err.message || 'Could not get macs for user');
                     }
                   });
                 } else {
+                  logger.info(err);
                   deny(err.message);
                 }
               });
@@ -248,7 +258,7 @@ app.post(apiSlug + '/auth', function(req, res) {
             if (err) {
               deny(err.message);
             } else {
-              deny('Multiple matches for ' + user);
+              deny((data.length ? 'Multiple' : 'No') + ' matches for ' + user);
             }
           }
         });
