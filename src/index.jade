@@ -129,7 +129,7 @@ html(lang='en')
                     p Logging In...
 
     script#admin(type='text/ng-template')
-      .row
+      .row(ng-controller='adminCtl')
         .col-sm-12
           tabset
             tab(heading='Config' )
@@ -150,7 +150,6 @@ html(lang='en')
                   label.btn.btn-primary(ng-model='config.authType', btn-radio="'nexudus'") Nexudus
                   label.btn.btn-primary(ng-model='config.authType', btn-radio="'deny-all'") Deny All
                   label.btn.btn-primary(ng-model='config.authType', btn-radio="'allow-all'") Allow All
-
 
     script#admin-logs(type='text/ng-template')
       h2 Logs
