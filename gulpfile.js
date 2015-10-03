@@ -26,7 +26,7 @@ gulp.task('watch-templates', function() {
 
 gulp.task('install-deps', function() {
   gulp.src([
-    './node_modules/angular-bootstrap/dist/ui-bootstrap-tpls.min.js',
+    './node_modules/angular-bootstrap/ui-bootstrap-tpls.min.js',
     './node_modules/angular/angular.min.js',
     './node_modules/angular/angular.min.js.map',
     './node_modules/angular-ui-router/release/angular-ui-router.min.js'
