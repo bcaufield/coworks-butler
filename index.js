@@ -219,7 +219,6 @@ app.post(apiSlug + '/auth', function(req, res) {
         redirect: req.session.base_grant_url + '?continue_url=' + req.session.user_continue_url
       });
     };
-
     var nex = new Nexudus(config.nexudus.loginBase, config.nexudus.auth);
 
     nex.authUser(user, pass, function(result, message) {
@@ -228,13 +227,13 @@ app.post(apiSlug + '/auth', function(req, res) {
         logger.wireless('authUser, user = ', JSON.stringify(user));
         
         // User is who they say they are, look them up
-        nex.findUser(user, function(data, err) {
+        nex.findUser(user, 'Coworker_Email', function(data, err) {
           logger.wireless('findUser, data = ', JSON.stringify(data), err);
 
           if (!err && data && data.length === 1) {
             var userInfo = data.pop();
             logger.wireless('got user info = ', JSON.stringify(userInfo));
-            
+
             if (userInfo.Id) {
               var nexUser = new NexudusUser(nex, userInfo.Id);
               nexUser.isValid(req.session.client_mac, function(data, err) {
