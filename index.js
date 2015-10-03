@@ -149,6 +149,7 @@ app.use(express.static(__dirname + '/pub'));
 // Splash page
 app.get('/splash', function(req, res) {
   logger.wireless('Splashdown', {session: req.session});
+  logger.wireless('req.session.node_mac', req.session.node_mac);
   if (serverConfig.authType == 'allow-all') {
     res.redirect(req.session.base_grant_url + '?continue_url=' + req.session.user_continue_url);
   } else {
