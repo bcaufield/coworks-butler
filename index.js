@@ -201,6 +201,7 @@ app.post(apiSlug + '/auth', function(req, res) {
   var user = req.body.username,
     pass = req.body.password;
 
+  logger.wireless('index.js /auth', user, pass, {base: config.nexudus.loginBase, auth : config.nexudus.auth});  
   if (user && pass) {
     var deny = function(message) {
       logger.wireless('Denied access to %s, Rejection: %s', user, message, {session: req.session})
@@ -222,6 +223,7 @@ app.post(apiSlug + '/auth', function(req, res) {
     var nex = new Nexudus(config.nexudus.loginBase, config.nexudus.auth);
 
     nex.authUser(user, pass, function(result, message) {
+      logger.wireless('authUser', result, message);
       if (result) {
         // User is who they say they are, look them up
         nex.findUser(user, function(data, err) {
