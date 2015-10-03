@@ -93,6 +93,7 @@ activeClients.on('ActiveClient-Remove', function(clientId) {
 
 // Parse get vals for redirect
 app.use(function (req, res, next) {
+
   logger.wireless('app.use, req =', req);
   
   if (req.hasOwnProperty('session')) {
