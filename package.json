@@ -5,7 +5,7 @@
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/shaunburdick/coworks-butler"
+    "url": "https://github.com/bcaufield/coworks-butler"
   },
   "scripts": {
     "start": "gulp build && node index.js"
