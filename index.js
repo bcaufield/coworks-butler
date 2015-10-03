@@ -200,8 +200,8 @@ app.post('/meraki', function(req, res) {
 app.post(apiSlug + '/auth', function(req, res) {
   var user = req.body.username,
     pass = req.body.password;
-  
-  logger.wireless('index.js /auth', user, pass, req.session.client_mac);  
+
+  logger.wireless('index.js /auth', user, pass, JSON.stringify(req.session));  
   if (user && pass) {
     var deny = function(message) {
       logger.wireless('Denied access to %s, Rejection: %s', user, message, {session: req.session})
