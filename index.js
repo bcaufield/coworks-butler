@@ -227,8 +227,8 @@ app.post(apiSlug + '/auth', function(req, res) {
         logger.wireless('authUser, user = ', JSON.stringify(user));
         
         // User is who they say they are, look them up
-        nex.findUser(user, 'Coworker_Email', function(data, err) {
-          logger.wireless('findUser, data = ', data.length, err);
+        nex.findUser(user, 'email', function(data, err) {
+          logger.wireless('findUser, data = ', data, err);
 
           if (!err && data && data.length === 1) {
             var userInfo = data.pop();
@@ -262,6 +262,7 @@ app.post(apiSlug + '/auth', function(req, res) {
               deny('Unable to find UserId');
             }
           } else {
+            logger.wireless('No user info err = ', err);
             if (err) {
               deny(err.message);
             } else {
