@@ -236,6 +236,7 @@ app.post(apiSlug + '/auth', function(req, res) {
 
             if (userInfo.Id) {
               var nexUser = new NexudusUser(nex, userInfo.Id);
+              logger.wireless('user session = ', JSON.stringify(req.session));
               nexUser.isValid(req.session.client_mac, function(data, err) {
                 if (!err && data) {
                   nexUser.addMac(req.session.client_mac, function(data, err) {
