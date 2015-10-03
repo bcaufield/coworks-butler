@@ -229,8 +229,8 @@ app.post(apiSlug + '/auth', function(req, res) {
         // User is who they say they are, look them up
         nex.findUser(user, 'Coworker_Email', function(data, err) {
           //logger.wireless('findUser, data = ', data, err);
-
-          if (!err && data && data.length === 1) {
+          //if (!err && data && data.length === 1) {
+          if (!err && data) {  
             var userInfo = data.pop();
             logger.wireless('got user info = ', JSON.stringify(userInfo));
 
