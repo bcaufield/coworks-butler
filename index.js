@@ -200,8 +200,8 @@ app.post('/meraki', function(req, res) {
 app.post(apiSlug + '/auth', function(req, res) {
   var user = req.body.username,
     pass = req.body.password;
-
-  logger.wireless('index.js /auth', user, pass);  
+  
+  logger.wireless('index.js /auth', user, pass, req.session.client_mac);  
   if (user && pass) {
     var deny = function(message) {
       logger.wireless('Denied access to %s, Rejection: %s', user, message, {session: req.session})
@@ -229,6 +229,8 @@ app.post(apiSlug + '/auth', function(req, res) {
         // User is who they say they are, look them up
         nex.findUser(user, 'Coworker_Email', function(data, err) {
           //logger.wireless('findUser, data = ', data, err);
+
+          // Changed to not test for multiple responses - the pop gets the last one anyway
           //if (!err && data && data.length === 1) {
           if (!err && data) {  
             var userInfo = data.pop();
