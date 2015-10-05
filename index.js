@@ -148,7 +148,7 @@ app.use(express.static(__dirname + '/pub'));
 
 app.get('/home', function(req, res) {
   res.sendFile('pub/home.html', { root: __dirname });
-}
+});
 
 // Splash page
 app.get('/splash', function(req, res) {
