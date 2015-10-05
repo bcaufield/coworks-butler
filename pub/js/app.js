@@ -9,7 +9,7 @@
   app.config(['$stateProvider', '$urlRouterProvider', '$locationProvider',
     function($stateProvider, $urlRouterProvider, $locationProvider) {
       // For any unmatched url, redirect to login
-      //$urlRouterProvider.otherwise("/login");
+      $urlRouterProvider.otherwise("/login");
       $locationProvider.html5Mode(true);
 
       $stateProvider
@@ -20,10 +20,6 @@
         .state('admin', {
           url: "/admin",
           templateUrl: "admin"
-        })
-        .state('home', {
-          url: "/home",
-          templateUrl: "home.html"
         })
         .state('error.403', {
           url: "/error/403",
