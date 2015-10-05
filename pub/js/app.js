@@ -22,8 +22,8 @@
           templateUrl: "admin"
         })
         .state('home', {
-          url: "/home.html",
-          templateUrl: ""
+          url: "/home",
+          templateUrl: "home.html"
         })
         .state('error.403', {
           url: "/error/403",
