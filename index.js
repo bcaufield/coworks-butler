@@ -153,7 +153,7 @@ app.get('/splash', function(req, res) {
   if (serverConfig.authType == 'allow-all') {
     res.redirect(req.session.base_grant_url + '?continue_url=' + req.session.user_continue_url);
   } else {
-    res.redirect('/login');
+    //res.redirect('/login');
   }
 });
 
